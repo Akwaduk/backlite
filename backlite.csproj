@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-backlite-f6ec013d-afce-427b-93cc-754c6f72b7ef</UserSecretsId>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="Data\app.db" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0-rc.2.25502.107" />
+    
+    <!-- MudBlazor UI Kit -->
+    <PackageReference Include="MudBlazor" Version="7.8.0" />
+    
+    <!-- SSH/SFTP for remote operations -->
+    <PackageReference Include="SSH.NET" Version="2023.0.1" />
+    
+    <!-- SignalR for real-time updates -->
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0-rc.2.25502.107" />
+    
+    <!-- Background jobs and channels -->
+    <PackageReference Include="System.Threading.Channels" Version="8.0.0" />
+    
+    <!-- Structured logging -->
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    
+    <!-- Additional SQLite package for better support -->
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0-rc.2.25502.107" />
+    
+    <!-- JSON handling -->
+    <PackageReference Include="System.Text.Json" Version="10.0.0-rc.2.25502.107" />
+    
+    <!-- Compression support -->
+    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
+    <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
+    
+    <!-- Cron expressions -->
+    <PackageReference Include="Cronos" Version="0.8.4" />
+  </ItemGroup>
+
+</Project>

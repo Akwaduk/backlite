@@ -1,0 +1,258 @@
+@page "/dashboard"
+@using MudBlazor
+@using backlite.Data
+@using backlite.Models
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>Dashboard - DB Backup Manager</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h3" GutterBottom="true">Dashboard</MudText>
+    
+    @if (_isLoading)
+    {
+        <MudPaper Class="pa-4 mt-4" MinHeight="200px">
+            <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Style="height: 150px;">
+                <MudProgressCircular Indeterminate="true" />
+                <MudText>Loading dashboard data...</MudText>
+            </MudStack>
+        </MudPaper>
+    }
+    else
+    {
+        <!-- Statistics Cards -->
+        <MudGrid Class="mt-4">
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard>
+                    <MudCardContent>
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <div>
+                                <MudText Typo="Typo.h4">@_stats.ServerCount</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Servers</MudText>
+                            </div>
+                            <MudIcon Icon="Icons.Material.Filled.Storage" Size="Size.Large" Color="Color.Primary" />
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard>
+                    <MudCardContent>
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <div>
+                                <MudText Typo="Typo.h4">@_stats.BackupPlanCount</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Backup Plans</MudText>
+                            </div>
+                            <MudIcon Icon="Icons.Material.Filled.Schedule" Size="Size.Large" Color="Color.Info" />
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard>
+                    <MudCardContent>
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <div>
+                                <MudText Typo="Typo.h4">@_stats.ActiveJobCount</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Active Jobs</MudText>
+                            </div>
+                            <MudIcon Icon="Icons.Material.Filled.PlayArrow" Size="Size.Large" Color="Color.Success" />
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard>
+                    <MudCardContent>
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <div>
+                                <MudText Typo="Typo.h4">@_stats.RecentBackupsCount</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Recent Backups</MudText>
+                            </div>
+                            <MudIcon Icon="Icons.Material.Filled.Backup" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Quick Actions -->
+        <MudPaper Class="pa-4 mt-4">
+            <MudText Typo="Typo.h5" GutterBottom="true">Quick Actions</MudText>
+            <MudStack Row Class="mt-3" Spacing="2">
+                <MudButton Variant="Variant.Filled" 
+                          Color="Color.Primary" 
+                          StartIcon="Icons.Material.Filled.Storage"
+                          Href="/servers">
+                    Manage Servers
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" 
+                          Color="Color.Secondary" 
+                          StartIcon="Icons.Material.Filled.Add"
+                          OnClick="CreateBackupPlan">
+                    New Backup Plan
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" 
+                          Color="Color.Info" 
+                          StartIcon="Icons.Material.Filled.Refresh"
+                          OnClick="RefreshData">
+                    Refresh
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+
+        <!-- Recent Activity -->
+        <MudGrid Class="mt-4">
+            <MudItem xs="12" md="8">
+                <MudPaper Class="pa-4">
+                    <MudText Typo="Typo.h6" GutterBottom="true">Recent Jobs</MudText>
+                    @if (_recentJobs.Any())
+                    {
+                        <MudList T="string">
+                            @foreach (var job in _recentJobs.Take(5))
+                            {
+                                <MudListItem T="string">
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                        <div>
+                                            <MudText Typo="Typo.body1">@job.DisplayName</MudText>
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                Started: @job.Started.ToString("MMM dd, HH:mm")
+                                            </MudText>
+                                        </div>
+                                        <MudChip T="string" Size="Size.Small" 
+                                                Color="GetJobStatusColor(job.Status)">
+                                            @job.Status
+                                        </MudChip>
+                                    </MudStack>
+                                </MudListItem>
+                                <MudDivider />
+                            }
+                        </MudList>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Info">No recent jobs found</MudAlert>
+                    }
+                </MudPaper>
+            </MudItem>
+            
+            <MudItem xs="12" md="4">
+                <MudPaper Class="pa-4">
+                    <MudText Typo="Typo.h6" GutterBottom="true">System Status</MudText>
+                    <MudList T="string">
+                        <MudListItem T="string">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="Icons.Material.Filled.Circle" 
+                                        Color="@(_stats.ServerCount > 0 ? Color.Success : Color.Error)" 
+                                        Size="Size.Small" />
+                                <MudText>Database Connection</MudText>
+                            </MudStack>
+                        </MudListItem>
+                        <MudListItem T="string">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="Icons.Material.Filled.Circle" 
+                                        Color="@(_stats.ActiveJobCount == 0 ? Color.Success : Color.Warning)" 
+                                        Size="Size.Small" />
+                                <MudText>Job Queue Status</MudText>
+                            </MudStack>
+                        </MudListItem>
+                        <MudListItem T="string">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="Icons.Material.Filled.Circle" 
+                                        Color="Color.Success" 
+                                        Size="Size.Small" />
+                                <MudText>Application Status</MudText>
+                            </MudStack>
+                        </MudListItem>
+                    </MudList>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    private bool _isLoading = true;
+    private DashboardStats _stats = new();
+    private List<JobEntity> _recentJobs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            // Load statistics
+            _stats.ServerCount = await DbContext.ServerConnections.CountAsync();
+            _stats.BackupPlanCount = await DbContext.BackupPlans.CountAsync();
+            _stats.ActiveJobCount = await DbContext.Jobs
+                .Where(j => j.Status == "Running" || j.Status == "Queued")
+                .CountAsync();
+            var sevenDaysAgo = DateTimeOffset.UtcNow.AddDays(-7);
+            _stats.RecentBackupsCount = await DbContext.BackupRuns
+                .Where(r => r.Started >= sevenDaysAgo)
+                .CountAsync();
+
+            // Load recent jobs
+            _recentJobs = await DbContext.Jobs
+                .OrderByDescending(j => j.Started)
+                .Take(10)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            // Handle error gracefully
+            Console.WriteLine($"Error loading dashboard data: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadDashboardData();
+    }
+
+    private void CreateBackupPlan()
+    {
+        // For now, navigate to servers page where users can manage backup plans
+        // In a future version, this could open a dialog to create a new backup plan
+        Navigation.NavigateTo("/servers");
+    }
+
+    private Color GetJobStatusColor(string status)
+    {
+        return status.ToLower() switch
+        {
+            "completed" => Color.Success,
+            "running" => Color.Info,
+            "queued" => Color.Warning,
+            "failed" => Color.Error,
+            "cancelled" => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+
+    private class DashboardStats
+    {
+        public int ServerCount { get; set; }
+        public int BackupPlanCount { get; set; }
+        public int ActiveJobCount { get; set; }
+        public int RecentBackupsCount { get; set; }
+    }
+}

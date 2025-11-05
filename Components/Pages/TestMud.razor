@@ -1,0 +1,62 @@
+@page "/test-mud"
+@using MudBlazor
+
+<PageTitle>MudBlazor Test</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudText Typo="Typo.h4" GutterBottom="true">MudBlazor Component Test</MudText>
+    
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6" GutterBottom="true">Basic Components</MudText>
+        
+        <MudStack Spacing="3">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary">
+                Primary Button
+            </MudButton>
+            
+            <MudChip T="string" Color="Color.Success">
+                Success Chip
+            </MudChip>
+            
+            <MudAlert Severity="Severity.Info">
+                This is an info alert
+            </MudAlert>
+            
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Card Title</MudText>
+                    <MudText Typo="Typo.body2">This is a card with some content</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudStack>
+    </MudPaper>
+    
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6" GutterBottom="true">Data Display</MudText>
+        
+        <MudGrid>
+            <MudItem xs="6">
+                <MudPaper Class="pa-2" Style="background-color: var(--mud-palette-primary);">
+                    <MudText Color="Color.Surface">Grid Item 1</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6">
+                <MudPaper Class="pa-2" Style="background-color: var(--mud-palette-secondary);">
+                    <MudText Color="Color.Surface">Grid Item 2</MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+    
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6" GutterBottom="true">Icons Test</MudText>
+        
+        <MudStack Row Spacing="2">
+            <MudIcon Icon="Icons.Material.Filled.Home" />
+            <MudIcon Icon="Icons.Material.Filled.Settings" />
+            <MudIcon Icon="Icons.Material.Filled.Storage" />
+            <MudIcon Icon="Icons.Material.Filled.Dashboard" />
+        </MudStack>
+    </MudPaper>
+
+</MudContainer>

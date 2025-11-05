@@ -1,0 +1,181 @@
+@page "/servers"
+@using Microsoft.AspNetCore.Components
+@using backlite.Models
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Server Management</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <MudText Typo="Typo.h3" GutterBottom="true">Server Management</MudText>
+    
+    <MudPaper Class="pa-4 mt-4">
+        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h5">Registered Servers</MudText>
+            <MudButton Variant="Variant.Filled" 
+                      Color="Color.Primary" 
+                      StartIcon="Icons.Material.Filled.Add"
+                      OnClick="OpenAddServerDialog">
+                Add Server
+            </MudButton>
+        </MudStack>
+
+        @if (servers?.Any() == true)
+        {
+            <MudTable Items="servers" Hover="true" Striped="true" FixedHeader="true">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Host</MudTh>
+                    <MudTh>Port</MudTh>
+                    <MudTh>Username</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                    <MudTd DataLabel="Host">@context.Host</MudTd>
+                    <MudTd DataLabel="Port">@context.Port</MudTd>
+                    <MudTd DataLabel="Username">@context.Username</MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Size="Size.Small" 
+                                Color="@(context.UseSudoForDiscovery ? Color.Success : Color.Default)">
+                            @(context.UseSudoForDiscovery ? "Sudo Enabled" : "Standard")
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudButtonGroup OverrideStyles="false">
+                            <MudIconButton Icon="Icons.Material.Filled.NetworkCheck" 
+                                         Color="Color.Info" 
+                                         Size="Size.Small"
+                                         OnClick="() => TestConnection(context)"
+                                         title="Test Connection" />
+                            <MudIconButton Icon="Icons.Material.Filled.Edit" 
+                                         Color="Color.Primary" 
+                                         Size="Size.Small"
+                                         OnClick="() => OpenEditServerDialog(context)"
+                                         title="Edit Server" />
+                            <MudIconButton Icon="Icons.Material.Filled.Delete" 
+                                         Color="Color.Error" 
+                                         Size="Size.Small"
+                                         OnClick="() => DeleteServer(context)"
+                                         title="Delete Server" />
+                        </MudButtonGroup>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info" Class="mt-4">
+                <MudText>No servers registered yet. Click "Add Server" to get started.</MudText>
+            </MudAlert>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<ServerConnection> servers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadServers();
+    }
+
+    private async Task LoadServers()
+    {
+        // TODO: Load from database via API
+        // For now, show sample data
+        servers = new List<ServerConnection>
+        {
+            new ServerConnection(
+                Guid.NewGuid(),
+                "Production DB Server",
+                "prod-db.example.com",
+                22,
+                "backup-user",
+                AuthKind.Password,
+                null,
+                null,
+                true,
+                Array.Empty<string>()
+            ),
+            new ServerConnection(
+                Guid.NewGuid(),
+                "Development Server",
+                "dev.example.com",
+                22,
+                "dev-user",
+                AuthKind.Password,
+                null,
+                null,
+                false,
+                Array.Empty<string>()
+            )
+        };
+        await Task.CompletedTask;
+    }
+
+    private async Task OpenAddServerDialog()
+    {
+        var dialog = await DialogService.ShowAsync<ServerEditDialog>("Add New Server");
+        var result = await dialog.Result;
+        
+        if (result != null && !result.Canceled)
+        {
+            await LoadServers();
+            Snackbar.Add("Server added successfully!", Severity.Success);
+        }
+    }
+
+    private async Task OpenEditServerDialog(ServerConnection server)
+    {
+        var parameters = new DialogParameters<ServerEditDialog>
+        {
+            { x => x.Server, server }
+        };
+        
+        var dialog = await DialogService.ShowAsync<ServerEditDialog>("Edit Server", parameters);
+        var result = await dialog.Result;
+        
+        if (result != null && !result.Canceled)
+        {
+            await LoadServers();
+            Snackbar.Add("Server updated successfully!", Severity.Success);
+        }
+    }
+
+    private async Task TestConnection(ServerConnection server)
+    {
+        Snackbar.Add($"Testing connection to {server.Name}...", Severity.Info);
+        
+        // TODO: Implement actual connection test via API
+        await Task.Delay(2000); // Simulate API call
+        
+        // Simulate random success/failure for demo
+        var success = Random.Shared.Next(0, 2) == 1;
+        if (success)
+        {
+            Snackbar.Add($"Successfully connected to {server.Name}!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add($"Failed to connect to {server.Name}. Please check credentials.", Severity.Error);
+        }
+    }
+
+    private async Task DeleteServer(ServerConnection server)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete server '{server.Name}'?",
+            yesText: "Delete", cancelText: "Cancel");
+        
+        if (result == true)
+        {
+            // TODO: Delete via API
+            servers.Remove(server);
+            Snackbar.Add($"Server '{server.Name}' deleted successfully!", Severity.Success);
+            StateHasChanged();
+        }
+    }
+}

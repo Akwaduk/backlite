@@ -1,0 +1,125 @@
+@inherits MudComponentBase
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@(Server?.Id != Guid.Empty ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)" Class="mr-3" />
+            @(Server?.Id != Guid.Empty ? "Edit Server" : "Add New Server")
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="@isValid" @bind-Errors="@errors">
+            <MudTextField @bind-Value="serverName"
+                         Label="Server Name"
+                         Required="true"
+                         RequiredError="Server name is required!"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense" />
+            
+            <MudTextField @bind-Value="serverHost"
+                         Label="Hostname or IP Address"
+                         Required="true"
+                         RequiredError="Hostname is required!"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense" />
+            
+            <MudNumericField @bind-Value="serverPort"
+                            Label="SSH Port"
+                            Min="1"
+                            Max="65535"
+                            Variant="Variant.Outlined"
+                            Margin="Margin.Dense" />
+            
+            <MudTextField @bind-Value="serverUsername"
+                         Label="Username"
+                         Required="true"
+                         RequiredError="Username is required!"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense" />
+            
+            <MudTextField @bind-Value="serverPassword"
+                         Label="Password"
+                         InputType="InputType.Password"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense"
+                         HelperText="Leave empty to use existing password" />
+            
+            <MudSwitch @bind-Value="useSudoForDiscovery"
+                      Label="Use sudo for discovery"
+                      Color="Color.Primary" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" 
+                  Disabled="@(!isValid)" 
+                  OnClick="Submit"
+                  Variant="Variant.Filled">
+            @(Server?.Id != Guid.Empty ? "Update" : "Add")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [Parameter] public ServerConnection? Server { get; set; }
+
+    private MudForm? form;
+    private bool isValid;
+    private string[] errors = Array.Empty<string>();
+
+    // Individual properties for form binding
+    private string serverName = string.Empty;
+    private string serverHost = string.Empty;
+    private int serverPort = 22;
+    private string serverUsername = string.Empty;
+    private string? serverPassword;
+    private bool useSudoForDiscovery = false;
+    private string[] allowedRoots = Array.Empty<string>();
+    private AuthKind authKind = AuthKind.Password;
+
+    protected override void OnInitialized()
+    {
+        if (Server != null)
+        {
+            serverName = Server.Name;
+            serverHost = Server.Host;
+            serverPort = Server.Port;
+            serverUsername = Server.Username;
+            useSudoForDiscovery = Server.UseSudoForDiscovery;
+            allowedRoots = Server.AllowedRoots;
+            authKind = Server.AuthKind;
+            // Don't copy password for security
+        }
+        else
+        {
+            serverPort = 22;
+            useSudoForDiscovery = false;
+            allowedRoots = Array.Empty<string>();
+            authKind = AuthKind.Password;
+        }
+    }
+
+    private void Cancel() => MudDialog?.Cancel();
+
+    private void Submit()
+    {
+        if (form?.IsValid == true)
+        {
+            var result = new ServerConnection(
+                Server?.Id ?? Guid.NewGuid(),
+                serverName,
+                serverHost,
+                serverPort,
+                serverUsername,
+                authKind,
+                serverPassword,
+                null, // PrivateKeyPem - not implemented in this dialog yet
+                useSudoForDiscovery,
+                allowedRoots
+            );
+            
+            MudDialog?.Close(DialogResult.Ok(result));
+        }
+    }
+}

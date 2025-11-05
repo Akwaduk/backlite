@@ -1,0 +1,37 @@
+@using MudBlazor
+
+<MudNavMenu>
+    <MudNavGroup text="Database Management" Icon="@Icons.Material.Filled.Storage" Expanded="true">
+        <MudNavLink Href="/servers" Icon="@Icons.Material.Filled.Computer">
+            Servers
+        </MudNavLink>
+        <MudNavLink Href="/discovery" Icon="@Icons.Material.Filled.Search">
+            Discovery
+        </MudNavLink>
+        <MudNavLink Href="/inspector" Icon="@Icons.Material.Filled.TableView">
+            Inspector
+        </MudNavLink>
+    </MudNavGroup>
+    
+    <MudNavGroup text="Backup Operations" Icon="@Icons.Material.Filled.Backup" Expanded="true">
+        <MudNavLink Href="/backup-plans" Icon="@Icons.Material.Filled.Schedule">
+            Backup Plans
+        </MudNavLink>
+        <MudNavLink Href="/backups" Icon="@Icons.Material.Filled.Archive">
+            Backups
+        </MudNavLink>
+        <MudNavLink Href="/jobs" Icon="@Icons.Material.Filled.Work">
+            Jobs
+        </MudNavLink>
+    </MudNavGroup>
+    
+    <MudDivider Class="my-2" />
+    
+    <MudNavLink Href="/settings" Icon="@Icons.Material.Filled.Settings">
+        Settings
+    </MudNavLink>
+    
+    <MudNavLink Href="/about" Icon="@Icons.Material.Filled.Info">
+        About
+    </MudNavLink>
+</MudNavMenu>

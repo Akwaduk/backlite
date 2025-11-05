@@ -1,0 +1,84 @@
+@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using MudBlazor
+
+<CascadingValue Value="true" Name="IsDarkMode">
+    <MudLayout>
+        <MudAppBar Elevation="1">
+            <MudIconButton Icon="Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+            <MudText Typo="Typo.h5" Class="ml-3">DB Backup Manager</MudText>
+            <MudSpacer />
+            <AuthorizeView>
+                <Authorized>
+                    <MudMenu Icon="Icons.Material.Filled.AccountCircle" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                        <MudMenuItem OnClick="@(() => NavigationManager.NavigateTo("/Account/Manage", true))">
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="Icons.Material.Filled.Settings" class="mr-2" />
+                                Account
+                            </div>
+                        </MudMenuItem>
+                        <MudDivider />
+                        <MudMenuItem OnClick="@(() => NavigationManager.NavigateTo("/Account/Logout", true))">
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="Icons.Material.Filled.Logout" class="mr-2" />
+                                Logout
+                            </div>
+                        </MudMenuItem>
+                    </MudMenu>
+                </Authorized>
+                <NotAuthorized>
+                    <MudButton Variant="Variant.Text" Color="Color.Inherit" Href="/Account/Login">Login</MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
+            <MudToggleIconButton 
+                @bind-Toggled="@_isDarkMode"
+                Icon="@Icons.Material.Filled.Brightness7" 
+                ToggledIcon="@Icons.Material.Filled.Brightness4"
+                Color="Color.Inherit"
+                ToggledColor="Color.Inherit"
+                title="Toggle Dark Mode" />
+        </MudAppBar>
+        
+        <MudDrawer @bind-Open="@_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+            <NavMenu />
+        </MudDrawer>
+        
+        <MudMainContent Class="mt-16 pa-4">
+            <AuthorizeView>
+                <Authorized>
+                    @Body
+                </Authorized>
+                <NotAuthorized>
+                    <MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+                        <MudPaper Class="pa-8" Elevation="4">
+                            <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+                                Welcome to DB Backup Manager
+                            </MudText>
+                            <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-4">
+                                Please log in to manage your database backups.
+                            </MudText>
+                            <div class="d-flex justify-center">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/Account/Login" Size="Size.Large">
+                                    Sign In
+                                </MudButton>
+                            </div>
+                        </MudPaper>
+                    </MudContainer>
+                </NotAuthorized>
+            </AuthorizeView>
+        </MudMainContent>
+    </MudLayout>
+</CascadingValue>
+
+@code {
+    private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}
