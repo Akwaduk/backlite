@@ -188,3 +188,4 @@ C:\src\backlite\obj\Debug\net10.0\backlite.pdb
 C:\src\backlite\obj\Debug\net10.0\backlite.genruntimeconfig.cache
 C:\src\backlite\obj\Debug\net10.0\ref\backlite.dll
 C:\src\backlite\bin\Debug\net10.0\Data\app.db
+C:\src\backlite\obj\Debug\net10.0\backlite.sourcelink.json

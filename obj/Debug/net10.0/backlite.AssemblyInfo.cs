@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("backlite")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6a13029973d0fb02db003f3621573c809f46d819")]
 [assembly: System.Reflection.AssemblyProductAttribute("backlite")]
 [assembly: System.Reflection.AssemblyTitleAttribute("backlite")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
